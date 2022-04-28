@@ -24,7 +24,7 @@ public class Form1 : Form
         Label snarkyPhraseLabel = new Label();
         snarkyPhraseLabel.Text = randomPhrase;
         snarkyPhraseLabel.Location = new Point(70, 45);
-        snarkyPhraseLabel.Font = new Font(Label.DefaultFont, FontStyle.Bold);
+        snarkyPhraseLabel.Font = new Font("Cambria", 11);
         snarkyPhraseLabel.TextAlign = ContentAlignment.MiddleCenter;
         snarkyPhraseLabel.Size = new Size(200, 60);
         this.Controls.Add(snarkyPhraseLabel);
@@ -33,7 +33,10 @@ public class Form1 : Form
         Button startButton = new Button();
         startButton.Text = "AVVIA IL SERVER";
         startButton.Location = new Point(70, 150);
+        startButton.Font = new Font("Tahoma", 13);
         startButton.Size = new Size(200, 60);
+        startButton.BackColor = Color.DarkGreen;
+        startButton.ForeColor = Color.White;
         this.Controls.Add(startButton);
 
         // click handler
