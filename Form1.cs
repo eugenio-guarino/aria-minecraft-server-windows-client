@@ -1,6 +1,7 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System;
+using static PhrasesList; 
 
 public class Form1 : Form
 {
@@ -16,12 +17,17 @@ public class Form1 : Form
         this.MaximizeBox = false;
         this.MinimizeBox = false;
 
-        // create snarkyPhrase to
-        snarkyPhrase snarkyPhrase = new snarkyPhrase();
-        snarkyPhrase.Text = "Snarky phrase.";
-        snarkyPhrase.Location = new Point(70, 70);
-        snarkyPhrase.Size = new Size(200, 60);
-        this.Controls.Add(snarkyPhrase);
+        // get a random phrase from database
+        string randomPhrase = RandomPhrase(PhrasesList.Phrases);
+
+        // create snarkyPhraseLabel to
+        Label snarkyPhraseLabel = new Label();
+        snarkyPhraseLabel.Text = randomPhrase;
+        snarkyPhraseLabel.Location = new Point(70, 45);
+        snarkyPhraseLabel.Font = new Font(Label.DefaultFont, FontStyle.Bold);
+        snarkyPhraseLabel.TextAlign = ContentAlignment.MiddleCenter;
+        snarkyPhraseLabel.Size = new Size(200, 60);
+        this.Controls.Add(snarkyPhraseLabel);
 
         //create button to start the server
         Button startButton = new Button();
@@ -30,13 +36,28 @@ public class Form1 : Form
         startButton.Size = new Size(200, 60);
         this.Controls.Add(startButton);
 
-        startButton.Click += new EventHandler(this.CreateServer);
+        // click handler
+        startButton.Click += new EventHandler(this.StartServer);
 
     }
 
-    void CreateServer(object sender, EventArgs e)
+    void StartServer(object sender, EventArgs e)
     {
-        if (!string.IsNullOrWhiteSpace(txtName.Text) && !lstNames.Items.Contains(txtName.Text))
-            lstNames.Items.Add(txtName.Text);
+        return;
+    }
+
+    public string RandomPhrase( string[] phrases )
+    {
+        string chosen = null;
+        int numberSeen = 0;
+        var rng = new Random();
+        foreach (string line in phrases)
+        {
+            if (rng.Next(++numberSeen) == 0)
+            {
+                chosen = line;
+            }
+        }
+        return chosen;
     }
 }
