@@ -4,6 +4,8 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
+using System.Linq;
+
 
 public class Form1 : Form
 {
@@ -11,8 +13,6 @@ public class Form1 : Form
 
     public void FormLayout()
     {
-        
-
         this.Name = "Daniland";
         this.Text = "Daniland";
         this.Size = new System.Drawing.Size(350, 350);
@@ -45,6 +45,12 @@ public class Form1 : Form
         startButton.ForeColor = Color.White;
         this.Controls.Add(startButton);
 
+        Label statusLabel = new Label();
+        statusLabel.Location = new Point(70, 152);
+        statusLabel.Text = "lol";
+        statusLabel.Font = new Font("Roboto", 9);
+        this.Controls.Add(statusLabel);
+
         // click handler
         startButton.Click += new EventHandler(this.StartServer);
 
@@ -52,6 +58,8 @@ public class Form1 : Form
 
     async void StartServer(object sender, EventArgs e)
     {
+        Label statusLabel = this.Controls.Find("statusLabel" , true).FirstOrDefault() as Label;
+
         try
         {
             string githubToken = "";
@@ -70,12 +78,14 @@ public class Form1 : Form
             var httpResponseMessage = await httpClient.PostAsync(new Uri($"https://api.github.com/repos/{username}/{repo}/dispatches"), content);
             string resp = await httpResponseMessage.Content.ReadAsStringAsync();
 
+            statusLabel.Text = "Operation successful.";
+            statusLabel.ForeColor = Color.DarkGreen;
+
         }
         catch(Exception ex)
         {
-            Debug.WriteLine("Caught exception : " + ex);
-                            
-            return false;
+            statusLabel.Text = $"An error has occurred.";
+            statusLabel.ForeColor = Color.DarkRed;
         }
         
     }
