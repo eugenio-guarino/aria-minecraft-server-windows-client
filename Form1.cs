@@ -1,12 +1,18 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System;
-using static PhrasesList; 
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Collections.Generic;
 
 public class Form1 : Form
 {
+    HttpClient httpClient = new HttpClient();
+
     public void FormLayout()
     {
+        
+
         this.Name = "Daniland";
         this.Text = "Daniland";
         this.Size = new System.Drawing.Size(350, 350);
@@ -44,9 +50,34 @@ public class Form1 : Form
 
     }
 
-    void StartServer(object sender, EventArgs e)
+    async void StartServer(object sender, EventArgs e)
     {
-        return;
+        try
+        {
+            string githubToken = "";
+            string username = "";
+            string repo = "";
+            string eventType = "";
+
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("event_type", eventType),
+            });
+
+            httpClient.DefaultRequestHeaders.Clear();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", githubToken); 
+
+            var httpResponseMessage = await httpClient.PostAsync(new Uri($"https://api.github.com/repos/{username}/{repo}/dispatches"), content);
+            string resp = await httpResponseMessage.Content.ReadAsStringAsync();
+
+        }
+        catch(Exception ex)
+        {
+            Debug.WriteLine("Caught exception : " + ex);
+                            
+            return false;
+        }
+        
     }
 
     public string RandomPhrase( string[] phrases )
