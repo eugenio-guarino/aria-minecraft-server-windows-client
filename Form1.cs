@@ -13,9 +13,9 @@ public class Form1 : Form
 
     public void FormLayout()
     {
-        this.Name = "Daniland";
-        this.Text = "Daniland";
-        this.Size = new System.Drawing.Size(350, 350);
+        this.Name = "Aria";
+        this.Text = "Aria";
+        this.Size = new System.Drawing.Size(350, 400);
 
         // avoid resizing
         this.StartPosition = FormStartPosition.CenterScreen;
@@ -23,46 +23,63 @@ public class Form1 : Form
         this.MaximizeBox = false;
         this.MinimizeBox = false;
 
+        // create snarkyPhraseLabel to
+        Label titleLabel = new Label();
+        titleLabel.Text = "Aria Server Launcher";
+        titleLabel.Location = new Point(70, 10);
+        titleLabel.Font = new Font("Consolas", 12);
+        titleLabel.TextAlign = ContentAlignment.MiddleCenter;
+        titleLabel.Size = new Size(200, 60);
+        this.Controls.Add(titleLabel);
+
         // get a random phrase from database
         string randomPhrase = RandomPhrase(PhrasesList.Phrases);
 
         // create snarkyPhraseLabel to
         Label snarkyPhraseLabel = new Label();
         snarkyPhraseLabel.Text = randomPhrase;
-        snarkyPhraseLabel.Location = new Point(70, 45);
-        snarkyPhraseLabel.Font = new Font("Cambria", 11);
+        snarkyPhraseLabel.Location = new Point(70, 60);
+        snarkyPhraseLabel.Font = new Font("Consolas", 8);
         snarkyPhraseLabel.TextAlign = ContentAlignment.MiddleCenter;
         snarkyPhraseLabel.Size = new Size(200, 60);
         this.Controls.Add(snarkyPhraseLabel);
 
+        TextBox tokenTextBox = new TextBox();
+        tokenTextBox.Text = "inserisci il codice";
+        tokenTextBox.Location = new Point(80, 175);
+        tokenTextBox.Size = new Size(180, 50);
+        tokenTextBox.Font = new Font("Consolas", 10);
+        this.Controls.Add(tokenTextBox);
+
         //create button to start the server
         Button startButton = new Button();
         startButton.Text = "AVVIA IL SERVER";
-        startButton.Location = new Point(70, 150);
+        startButton.Location = new Point(70, 235);
         startButton.Font = new Font("Tahoma", 13);
-        startButton.Size = new Size(200, 60);
-        startButton.BackColor = Color.DarkGreen;
-        startButton.ForeColor = Color.White;
+        startButton.Size = new Size(200, 50);
+        startButton.BackColor = Color.DarkOrange;
+        startButton.ForeColor= Color.White;
+        startButton.UseCompatibleTextRendering = true;
         this.Controls.Add(startButton);
 
         Label statusLabel = new Label();
-        statusLabel.Location = new Point(70, 152);
+        statusLabel.Location = new Point(70, 290);
         statusLabel.Text = "lol";
-        statusLabel.Font = new Font("Roboto", 9);
+        statusLabel.Font = new Font("Consolas", 9);
         this.Controls.Add(statusLabel);
 
         // click handler
         startButton.Click += new EventHandler(this.StartServer);
-
     }
 
     async void StartServer(object sender, EventArgs e)
     {
         Label statusLabel = this.Controls.Find("statusLabel" , true).FirstOrDefault() as Label;
+        TextBox tokenBox = this.Controls.Find("tokenTextBox" , true).FirstOrDefault() as TextBox;
 
         try
         {
-            string githubToken = "";
+            string githubToken = tokenBox.Text;
             string username = "";
             string repo = "";
             string eventType = "";
