@@ -1,31 +1,24 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 public class Form1 : Form
 {
-    HttpClient httpClient = new HttpClient();
-
     public void FormLayout()
     {
         this.Name = "Aria Server Launcher";
         this.Text = "Aria Server Launcher";
         this.Size = new System.Drawing.Size(350, 400);
 
-        // avoid resizing
+        // Disable Window resizing
         this.StartPosition = FormStartPosition.CenterScreen;
         this.FormBorderStyle = FormBorderStyle.FixedSingle;
         this.MaximizeBox = false;
         this.MinimizeBox = false;
-        
 
-        // create snarkyPhraseLabel to
-        Label titleLabel = new Label();
+        // Title
+        System.Windows.Forms.Label titleLabel = new System.Windows.Forms.Label();
         titleLabel.Text = "ARIA";
         titleLabel.Location = new Point(70, 10);
         titleLabel.Font = new Font("Wide Latin", 12);
@@ -37,8 +30,8 @@ public class Form1 : Form
         // get a random phrase from database
         string randomPhrase = RandomPhrase(PhrasesList.Phrases);
 
-        // create snarkyPhraseLabel to
-        Label snarkyPhraseLabel = new Label();
+        // Label with funny phrases
+        System.Windows.Forms.Label snarkyPhraseLabel = new System.Windows.Forms.Label();
         snarkyPhraseLabel.Text = randomPhrase;
         snarkyPhraseLabel.Location = new Point(70, 60);
         snarkyPhraseLabel.Font = new Font("Consolas", 8);
@@ -46,6 +39,7 @@ public class Form1 : Form
         snarkyPhraseLabel.Size = new Size(200, 60);
         this.Controls.Add(snarkyPhraseLabel);
 
+        // TextBox for secret code
         TextBox tokenTextBox = new TextBox();
         tokenTextBox.Text = "inserisci il codice";
         tokenTextBox.Name = "tokenTextBox";
@@ -54,7 +48,7 @@ public class Form1 : Form
         tokenTextBox.Font = new Font("Consolas", 9);
         this.Controls.Add(tokenTextBox);
 
-        //create button to start the server
+        // Start Button
         Button startButton = new Button();
         startButton.Text = "AVVIA IL SERVER";
         startButton.Location = new Point(70, 235);
@@ -64,7 +58,8 @@ public class Form1 : Form
         startButton.UseCompatibleTextRendering = true;
         this.Controls.Add(startButton);
 
-        Label statusLabel = new Label();
+        // Status label
+        System.Windows.Forms.Label statusLabel = new System.Windows.Forms.Label();
         statusLabel.Name = "statusLabel";
         statusLabel.Location = new Point(70, 290);
         statusLabel.Size = new Size(200, 50);
@@ -72,43 +67,59 @@ public class Form1 : Form
         statusLabel.TextAlign = ContentAlignment.MiddleCenter;
         this.Controls.Add(statusLabel);
 
-        // click handler
+        // Handlers
         startButton.Click += new EventHandler(this.StartServer);
     }
 
-    async void StartServer(object sender, EventArgs e)
+    void StartServer(object sender, EventArgs ev)
     {
-        Label statusLabel = this.Controls.Find("statusLabel" , true).FirstOrDefault() as Label;
-        TextBox tokenBox = this.Controls.Find("tokenTextBox" , true).FirstOrDefault() as TextBox;
+        System.Windows.Forms.Label statusLabel = this.Controls.Find("statusLabel", true).FirstOrDefault() as System.Windows.Forms.Label;
+        TextBox tokenBox = this.Controls.Find("tokenTextBox", true).FirstOrDefault() as TextBox;
         string githubToken = tokenBox.Text;
         string username = "";
         string repo = "";
-        string eventType = "";
+        string result = " ";
 
-        if (String.IsNullOrEmpty(githubToken)){
+        if (String.IsNullOrEmpty(githubToken))
+        {
             statusLabel.Text = "Code can't be empty.";
             statusLabel.ForeColor = Color.DarkRed;
             return;
         }
 
-        var content = new FormUrlEncodedContent(new[]{new KeyValuePair<string, string>("event_type", eventType)});
 
-        httpClient.DefaultRequestHeaders.Clear();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", githubToken); 
+        // Couldn't get the http request to work on HTTP Client, so CMD process was used instead.
+        System.Diagnostics.Process process = new System.Diagnostics.Process();
+        System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+        startInfo.RedirectStandardOutput = true;
+        startInfo.RedirectStandardError = true;
+        startInfo.UseShellExecute = false;
+        startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+        startInfo.FileName = "cmd.exe";
+        startInfo.Arguments = $@"/C curl --request POST --url ""https://api.github.com/repos/{username}/{repo}/dispatches"" --header ""authorization: Bearer {githubToken}""" + @" --data ""{\""event_type\"":\""create-infr\""}""";
+        process.StartInfo = startInfo;
 
-        var httpResponseMessage = await httpClient.PostAsync(new Uri($"https://api.github.com/repos/{username}/{repo}/dispatches"), content);
+        process.OutputDataReceived += (s, e) => result += e.Data;
+        process.Start();
 
-        if (httpResponseMessage.ToString().Contains("StatusCode: 204")){
-            statusLabel.Text = "Operation successful.";
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        process.WaitForExit();
+
+
+        if (!(result.IndexOf("bad credentials", StringComparison.OrdinalIgnoreCase) >= 0))
+        {
+            statusLabel.Text = "Success! World will be ready in 5 minutes.";
             statusLabel.ForeColor = Color.DarkGreen;
         }
-        else{
-            statusLabel.Text = "Something went wrong.";
+        else
+        {
+            statusLabel.Text = "Wrong secret code.";
             statusLabel.ForeColor = Color.DarkRed;
         }
     }
 
-    public string RandomPhrase( string[] phrases )
+    public string RandomPhrase(string[] phrases)
     {
         string chosen = null;
         int numberSeen = 0;
