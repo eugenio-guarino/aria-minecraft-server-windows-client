@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 public class Program
 {
-    public static Form1 form = new Form1();
+    public static Client form = new Client();
     [STAThread]
     static void Main(string[] args)
     {

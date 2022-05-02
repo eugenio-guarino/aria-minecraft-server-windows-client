@@ -3,7 +3,7 @@ using System.Drawing;
 using System;
 using System.Linq;
 
-public class Form1 : Form
+public class Client : Form
 {
     public void FormLayout()
     {
@@ -76,8 +76,8 @@ public class Form1 : Form
         System.Windows.Forms.Label statusLabel = this.Controls.Find("statusLabel", true).FirstOrDefault() as System.Windows.Forms.Label;
         TextBox tokenBox = this.Controls.Find("tokenTextBox", true).FirstOrDefault() as TextBox;
         string githubToken = tokenBox.Text;
-        string username = "";
-        string repo = "";
+        string username = "eugenio-guarino";
+        string repo = "gcp-minecraft-server";
         string result = " ";
 
         if (String.IsNullOrEmpty(githubToken))
@@ -86,7 +86,6 @@ public class Form1 : Form
             statusLabel.ForeColor = Color.DarkRed;
             return;
         }
-
 
         // Couldn't get the http request to work on HTTP Client, so CMD process was used instead.
         System.Diagnostics.Process process = new System.Diagnostics.Process();
