@@ -77,7 +77,7 @@ public class Client : Form
         TextBox tokenBox = this.Controls.Find("tokenTextBox", true).FirstOrDefault() as TextBox;
         string githubToken = tokenBox.Text;
         string username = "eugenio-guarino";
-        string repo = "gcp-minecraft-server";
+        string repo = "aria-minecraft-server";
         string result = " ";
 
         if (String.IsNullOrEmpty(githubToken))
