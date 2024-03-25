@@ -9,7 +9,7 @@ public class Client : Form
     {
         this.Name = "Aria Server Launcher";
         this.Text = "Aria Server Launcher";
-        this.Size = new System.Drawing.Size(350, 400);
+        this.Size = new System.Drawing.Size(350, 480);
 
         // Disable Window resizing
         this.StartPosition = FormStartPosition.CenterScreen;
@@ -21,11 +21,12 @@ public class Client : Form
         System.Windows.Forms.Label titleLabel = new System.Windows.Forms.Label();
         titleLabel.Text = "ARIA";
         titleLabel.Location = new Point(70, 10);
-        titleLabel.Font = new Font("Wide Latin", 12);
+        titleLabel.Font = new Font("Brush Script MT", 18, FontStyle.Regular); // Set the font to "Brush Script MT" and adjust size
         titleLabel.TextAlign = ContentAlignment.MiddleCenter;
         titleLabel.Size = new Size(200, 60);
         this.Controls.Add(titleLabel);
         this.ActiveControl = titleLabel;
+
 
         // get a random phrase from database
         string randomPhrase = RandomPhrase(PhrasesList.Phrases);
@@ -41,7 +42,7 @@ public class Client : Form
 
         // TextBox for secret code
         TextBox tokenTextBox = new TextBox();
-        tokenTextBox.Text = "inserisci il codice";
+        tokenTextBox.Text = "insert the code";
         tokenTextBox.Name = "tokenTextBox";
         tokenTextBox.Location = new Point(80, 175);
         tokenTextBox.Size = new Size(180, 50);
@@ -50,12 +51,29 @@ public class Client : Form
 
         // Start Button
         Button startButton = new Button();
-        startButton.Text = "AVVIA IL SERVER";
+        startButton.Text = "START UP SERVER";
         startButton.Location = new Point(70, 235);
         startButton.Font = new Font("Tahoma", 11, FontStyle.Bold);
         startButton.Size = new Size(200, 50);
-        startButton.BackColor = Color.SkyBlue;
+
+        // Apply visual enhancements
+        startButton.BackColor = Color.FromArgb(224, 240, 255); // Light blue color for a soothing effect
+        startButton.FlatAppearance.BorderSize = 0; // Remove border
+        startButton.FlatStyle = FlatStyle.Flat; // Flat appearance
+        startButton.ForeColor = Color.Black; // Set font color to black for better readability
         startButton.UseCompatibleTextRendering = true;
+
+        // Apply gradient background using background image
+        Image buttonBackground = new Bitmap(startButton.Width, startButton.Height);
+        using (Graphics g = Graphics.FromImage(buttonBackground))
+        {
+            using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(startButton.ClientRectangle, Color.FromArgb(224, 240, 255), Color.FromArgb(191, 219, 255), 90))
+            {
+                g.FillRectangle(brush, startButton.ClientRectangle);
+            }
+        }
+        startButton.BackgroundImage = buttonBackground;
+
         this.Controls.Add(startButton);
 
         // Status label
@@ -67,8 +85,26 @@ public class Client : Form
         statusLabel.TextAlign = ContentAlignment.MiddleCenter;
         this.Controls.Add(statusLabel);
 
+        Button paypalButton = new Button();
+        paypalButton.Text = "Donate via PayPal";
+        paypalButton.Size = new Size(150, 30); // Adjust size as needed
+        paypalButton.Font = new Font("Tahoma", 10);
+        paypalButton.BackColor = Color.Blue;
+        paypalButton.ForeColor = Color.White;
+        paypalButton.FlatStyle = FlatStyle.Flat; // To remove button border
+        paypalButton.FlatAppearance.BorderSize = 0; // To remove button border
+        paypalButton.Location = new Point((this.ClientSize.Width - paypalButton.Width) / 2, 350); // Center horizontally
+        this.Controls.Add(paypalButton);
+
+        // Event handler for PayPal button click
+        paypalButton.Click += new EventHandler((sender, e) =>
+        {
+            // Open PayPal link
+            System.Diagnostics.Process.Start("https://www.paypal.me/ungenio6");
+        });
+
         // Handlers
-        startButton.Click += new EventHandler(this.StartServer);
+
     }
 
     void StartServer(object sender, EventArgs ev)
