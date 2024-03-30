@@ -7,7 +7,7 @@ public class Program
     [STAThread]
     static void Main(string[] args)
     {
-        form.FormLayout();;
+        form.FormLayout(); ;
         Application.Run(form);
     }
 }
