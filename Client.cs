@@ -42,12 +42,16 @@ public class Client : Form
 
         // TextBox for secret code
         TextBox tokenTextBox = new TextBox();
-        tokenTextBox.Text = "insert the code";
+        tokenTextBox.Text = "insert the code"; // Set initial placeholder text
+        tokenTextBox.ForeColor = SystemColors.GrayText; // Set placeholder text color
         tokenTextBox.Name = "tokenTextBox";
         tokenTextBox.Location = new Point(80, 175);
         tokenTextBox.Size = new Size(180, 50);
         tokenTextBox.Font = new Font("Consolas", 9);
+        tokenTextBox.Enter += TokenTextBox_Enter;
+        tokenTextBox.Leave += TokenTextBox_Leave;
         this.Controls.Add(tokenTextBox);
+
 
         // Start Button
         Button startButton = new Button();
@@ -75,6 +79,9 @@ public class Client : Form
         startButton.BackgroundImage = buttonBackground;
 
         this.Controls.Add(startButton);
+
+        // Handlers
+        startButton.Click += new EventHandler(this.StartServer);
 
         // Status label
         System.Windows.Forms.Label statusLabel = new System.Windows.Forms.Label();
@@ -107,11 +114,33 @@ public class Client : Form
 
     }
 
+    // Event handler for when the TextBox receives focus
+    void TokenTextBox_Enter(object sender, EventArgs e)
+    {
+        TextBox textBox = (TextBox)sender;
+        if (textBox.Text == "insert the code")
+        {
+            textBox.Text = "";
+            textBox.ForeColor = SystemColors.WindowText; // Restore default text color
+        }
+    }
+
+    // Event handler for when the TextBox loses focus
+    void TokenTextBox_Leave(object sender, EventArgs e)
+    {
+        TextBox textBox = (TextBox)sender;
+        if (string.IsNullOrWhiteSpace(textBox.Text))
+        {
+            textBox.Text = "insert the code";
+            textBox.ForeColor = SystemColors.GrayText; // Set placeholder text color
+        }
+    }
+
     void StartServer(object sender, EventArgs ev)
     {
         System.Windows.Forms.Label statusLabel = this.Controls.Find("statusLabel", true).FirstOrDefault() as System.Windows.Forms.Label;
         TextBox tokenBox = this.Controls.Find("tokenTextBox", true).FirstOrDefault() as TextBox;
-        string githubToken = tokenBox.Text;
+        string githubToken = tokenBox.Text.Replace(" ", ""); // Removing spaces from the token
         string username = "eugenio-guarino";
         string repo = "aria-minecraft-server-iac";
         string result = " ";
@@ -154,7 +183,7 @@ public class Client : Form
         }
     }
 
-    public string RandomPhrase(string[] phrases)
+    string RandomPhrase(string[] phrases)
     {
         string chosen = null;
         int numberSeen = 0;
