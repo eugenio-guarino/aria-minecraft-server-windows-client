@@ -2,36 +2,35 @@ using System.Windows.Forms;
 using System.Drawing;
 using System;
 using System.Linq;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 
 public class Client : Form
 {
     public void FormLayout()
-    {
+    {   
+        // General settings
         this.Name = "Aria Server Launcher";
         this.Text = "Aria Server Launcher";
         this.Size = new System.Drawing.Size(350, 480);
 
-        // Disable Window resizing
         this.StartPosition = FormStartPosition.CenterScreen;
         this.FormBorderStyle = FormBorderStyle.FixedSingle;
         this.MaximizeBox = false;
         this.MinimizeBox = false;
 
-        // Title
+        // Title label
         System.Windows.Forms.Label titleLabel = new System.Windows.Forms.Label();
-        titleLabel.Text = "ARIA";
+        titleLabel.Text = "AriA";
         titleLabel.Location = new Point(70, 10);
-        titleLabel.Font = new Font("Brush Script MT", 18, FontStyle.Regular); // Set the font to "Brush Script MT" and adjust size
+        titleLabel.Font = new Font("Unispace", 20); // Use the first font family in the collection        
         titleLabel.TextAlign = ContentAlignment.MiddleCenter;
         titleLabel.Size = new Size(200, 60);
         this.Controls.Add(titleLabel);
         this.ActiveControl = titleLabel;
 
-
-        // get a random phrase from database
-        string randomPhrase = RandomPhrase(PhrasesList.Phrases);
-
-        // Label with funny phrases
+        // Retrieve random funny phrase and put it in the label
+        string randomPhrase = RetrieveFunnyPhrase(PhrasesList.Phrases);
         System.Windows.Forms.Label snarkyPhraseLabel = new System.Windows.Forms.Label();
         snarkyPhraseLabel.Text = randomPhrase;
         snarkyPhraseLabel.Location = new Point(70, 60);
@@ -42,66 +41,113 @@ public class Client : Form
 
         // TextBox for secret code
         TextBox tokenTextBox = new TextBox();
-        tokenTextBox.Text = "insert the code"; // Set initial placeholder text
+        tokenTextBox.Text = "paste the code here"; // Set initial placeholder text
         tokenTextBox.ForeColor = SystemColors.GrayText; // Set placeholder text color
         tokenTextBox.Name = "tokenTextBox";
         tokenTextBox.Location = new Point(80, 175);
-        tokenTextBox.Size = new Size(180, 50);
+        tokenTextBox.Size = new Size(180, 75);
+        tokenTextBox.Multiline = true;
         tokenTextBox.Font = new Font("Consolas", 9);
         tokenTextBox.Enter += TokenTextBox_Enter;
         tokenTextBox.Leave += TokenTextBox_Leave;
+
+        // allows to select all text
+        tokenTextBox.KeyDown += (sender, e) =>
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                tokenTextBox.SelectAll(); // Select all text in the TextBox
+                e.SuppressKeyPress = true; // Prevent default sound or behavior
+            }
+        };
+        
         this.Controls.Add(tokenTextBox);
 
 
         // Start Button
-        Button startButton = new Button();
-        startButton.Text = "START UP SERVER";
-        startButton.Location = new Point(70, 235);
-        startButton.Font = new Font("Tahoma", 11, FontStyle.Bold);
-        startButton.Size = new Size(200, 50);
-
-        // Apply visual enhancements
-        startButton.BackColor = Color.FromArgb(224, 240, 255); // Light blue color for a soothing effect
-        startButton.FlatAppearance.BorderSize = 0; // Remove border
-        startButton.FlatStyle = FlatStyle.Flat; // Flat appearance
-        startButton.ForeColor = Color.Black; // Set font color to black for better readability
-        startButton.UseCompatibleTextRendering = true;
-
-        // Apply gradient background using background image
-        Image buttonBackground = new Bitmap(startButton.Width, startButton.Height);
-        using (Graphics g = Graphics.FromImage(buttonBackground))
+        Button startButton = new Button
         {
-            using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(startButton.ClientRectangle, Color.FromArgb(224, 240, 255), Color.FromArgb(191, 219, 255), 90))
+            Text = "START MC SERVER",
+            Location = new Point(70, 275),
+            Font = new Font("Tahoma", 11, FontStyle.Bold),
+            Size = new Size(200, 50),
+            FlatStyle = FlatStyle.Flat, // Allow custom painting
+            BackColor = Color.LightBlue // Base color for the button
+        };
+
+        // Remove border for a cleaner look
+        startButton.FlatAppearance.BorderSize = 0;
+
+        // Add Paint event for convex effect
+        startButton.Paint += (sender, e) =>
+        {
+            Button btn = sender as Button;
+            if (btn != null)
             {
-                g.FillRectangle(brush, startButton.ClientRectangle);
+                // Draw convex gradient (blue shades)
+                using (LinearGradientBrush brush = new LinearGradientBrush(
+                        btn.ClientRectangle,
+                        Color.FromArgb(191, 219, 255), // Light blue
+                        Color.FromArgb(128, 179, 255), // Darker blue
+                        LinearGradientMode.Vertical)) // Vertical gradient
+                {
+                    e.Graphics.FillRectangle(brush, btn.ClientRectangle);
+                }
+
+                // Add border
+                using (Pen pen = new Pen(Color.FromArgb(0, 128, 255), 2)) // Blue border
+                {
+                    e.Graphics.DrawRectangle(pen, 0, 0, btn.Width - 1, btn.Height - 1);
+                }
+
+                // Draw text
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    btn.Text,
+                    btn.Font,
+                    btn.ClientRectangle,
+                    Color.White, // White text for contrast
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
-        }
-        startButton.BackgroundImage = buttonBackground;
+        };
+
+        // Timer for enabling the button after 5 seconds
+        Timer enableTimer = new Timer { Interval = 5000 };
+        startButton.Click += (s, e) =>
+        {
+            startButton.Enabled = false; 
+            enableTimer.Start(); 
+        };
+        enableTimer.Tick += (s, e) =>
+        {
+            startButton.Enabled = true; 
+            enableTimer.Stop();
+        };
+
+        startButton.Click += new EventHandler(this.StartServer);
 
         this.Controls.Add(startButton);
-
-        // Handlers
-        startButton.Click += new EventHandler(this.StartServer);
 
         // Status label
         System.Windows.Forms.Label statusLabel = new System.Windows.Forms.Label();
         statusLabel.Name = "statusLabel";
-        statusLabel.Location = new Point(70, 290);
+        statusLabel.Location = new Point(70, 340);
         statusLabel.Size = new Size(200, 50);
         statusLabel.Font = new Font("Consolas", 9);
         statusLabel.TextAlign = ContentAlignment.MiddleCenter;
         this.Controls.Add(statusLabel);
 
+        // paypal button
         Button paypalButton = new Button();
         paypalButton.Text = "Donate via PayPal";
-        paypalButton.Size = new Size(150, 30); // Adjust size as needed
+        paypalButton.Size = new Size(130, 30); // Adjust size as needed
         paypalButton.Font = new Font("Tahoma", 10);
         paypalButton.BackColor = Color.Blue;
         paypalButton.ForeColor = Color.White;
         paypalButton.FlatStyle = FlatStyle.Flat; // To remove button border
         paypalButton.FlatAppearance.BorderSize = 0; // To remove button border
-        paypalButton.Location = new Point((this.ClientSize.Width - paypalButton.Width) / 2, 350); // Center horizontally
-        this.Controls.Add(paypalButton);
+        paypalButton.Location = new Point((this.ClientSize.Width - paypalButton.Width) / 2, 400); // Center horizontally
+
 
         // Event handler for PayPal button click
         paypalButton.Click += new EventHandler((sender, e) =>
@@ -110,17 +156,16 @@ public class Client : Form
             System.Diagnostics.Process.Start("https://www.paypal.me/ungenio6");
         });
 
-        // Handlers
+        this.Controls.Add(paypalButton);
 
     }
 
-    // Event handler for when the TextBox receives focus
     void TokenTextBox_Enter(object sender, EventArgs e)
     {
         TextBox textBox = (TextBox)sender;
-        if (textBox.Text == "insert the code")
+        if (textBox.Text == "paste the code here") // Correct comparison
         {
-            textBox.Text = "";
+            textBox.Text = ""; // Clear placeholder text
             textBox.ForeColor = SystemColors.WindowText; // Restore default text color
         }
     }
@@ -129,9 +174,9 @@ public class Client : Form
     void TokenTextBox_Leave(object sender, EventArgs e)
     {
         TextBox textBox = (TextBox)sender;
-        if (string.IsNullOrWhiteSpace(textBox.Text))
+        if (string.IsNullOrWhiteSpace(textBox.Text)) // Check for empty input
         {
-            textBox.Text = "insert the code";
+            textBox.Text = "paste the code here"; // Reset placeholder text
             textBox.ForeColor = SystemColors.GrayText; // Set placeholder text color
         }
     }
@@ -183,7 +228,7 @@ public class Client : Form
         }
     }
 
-    string RandomPhrase(string[] phrases)
+    string RetrieveFunnyPhrase(string[] phrases)
     {
         string chosen = null;
         int numberSeen = 0;
